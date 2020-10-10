@@ -343,6 +343,19 @@ def get_profiles(data, ngrid=50, scale=[1.0, 1.0]):
 
     return [data[0], s2_prof]  #, s2ref_prof]
 
+def get_simulation_results(data_dir, names, nsim = 10):
+    
+    atom_pos = []
+    atom_ids = []
+
+    for name in names:
+        npy_name = os.path.join(data_dir, name +'_sim.npy')
+        mat = np.load(npy_name)
+        atom_pos.append(mat[:, nsim:])
+        atom_ids.append(mat[:, 0:nsim])
+    
+    return atom_pos, atom_ids
+
 
 def get_atom_positions(data_dir, names, thresh):
     
@@ -620,6 +633,22 @@ def show_images(names, atom_pos, atom_ids, intensities, symbol_size=7):
     for i, (name, img, apos, aids) in enumerate(zip(names, intensities, atom_pos, atom_ids)):
         ir, ic = divmod(i, 2)
         axs[ir, ic].imshow(img)#, cmap = 'hot')
+        axs[ir, ic].scatter(apos[aids==0,1], apos[aids==0,0], c = 'r', s = symbol_size)
+        axs[ir, ic].scatter(apos[aids==1,1], apos[aids==1,0], c = 'k', s = symbol_size)
+        axs[ir, ic].get_xaxis().set_visible(False)
+        axs[ir, ic].get_yaxis().set_visible(False)
+        axs[ir, ic].set_title(name)
+
+    plt.tight_layout()
+    plt.show()
+
+def show_positions(names, atom_pos, atom_ids, symbol_size=7, isim = 0):
+
+    fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), dpi = 96)
+
+    for i, (name, apos, aidsall) in enumerate(zip(names, atom_pos, atom_ids)):
+        aids = np.squeeze(aidsall[:, isim])
+        ir, ic = divmod(i, 2)
         axs[ir, ic].scatter(apos[aids==0,1], apos[aids==0,0], c = 'r', s = symbol_size)
         axs[ir, ic].scatter(apos[aids==1,1], apos[aids==1,0], c = 'k', s = symbol_size)
         axs[ir, ic].get_xaxis().set_visible(False)
